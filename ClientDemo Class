@@ -1,0 +1,53 @@
+package com.klef.fsad.exam;
+
+import org.hibernate.*;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
+
+import java.util.*;
+
+public class ClientDemo 
+{
+    public static void main(String[] args) 
+    {
+        SessionFactory sf = new Configuration().configure().buildSessionFactory();
+        Session session = sf.openSession();
+        Transaction tx = session.beginTransaction();
+
+        // I. Insert Records using Persistent Object
+        Invoice inv1 = new Invoice("Invoice1", new Date(), "PAID", 5000);
+        Invoice inv2 = new Invoice("Invoice2", new Date(), "PENDING", 3000);
+        Invoice inv3 = new Invoice("Invoice3", new Date(), "CANCELLED", 2000);
+
+        session.save(inv1);
+        session.save(inv2);
+        session.save(inv3);
+
+        tx.commit();
+
+        // II. View all records using HQL (No WHERE clause)
+        session.beginTransaction();
+
+        String hql = "from Invoice";   // HQL query
+        Query<Invoice> query = session.createQuery(hql, Invoice.class);
+
+        List<Invoice> list = query.list();
+
+        System.out.println("---- Invoice Records ----");
+        for (Invoice i : list) 
+        {
+            System.out.println(
+                i.getId() + " | " +
+                i.getName() + " | " +
+                i.getDate() + " | " +
+                i.getStatus() + " | " +
+                i.getAmount()
+            );
+        }
+
+        session.getTransaction().commit();
+
+        session.close();
+        sf.close();
+    }
+}
